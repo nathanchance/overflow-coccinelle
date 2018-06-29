@@ -1,0 +1,29 @@
+// Directly refer to structure's field
+@@
+identifier alloc =~ "vmalloc|vzalloc";
+identifier VAR, ELEMENT;
+expression COUNT;
+@@
+
+- alloc(sizeof(*VAR) + COUNT * sizeof(*VAR->ELEMENT))
++ alloc(struct_size(VAR, ELEMENT, COUNT))
+
+// mr = kzalloc(sizeof(*mr) + m * sizeof(mr->map[0]), GFP_KERNEL);
+@@
+identifier alloc =~ "vmalloc|vzalloc";
+identifier VAR, ELEMENT;
+expression COUNT;
+@@
+
+- alloc(sizeof(*VAR) + COUNT * sizeof(VAR->ELEMENT[0]))
++ alloc(struct_size(VAR, ELEMENT, COUNT))
+
+// Same pattern, but can't trivially locate the trailing element name,
+// or variable name.
+@@
+identifier alloc =~ "vmalloc|vzalloc";
+expression SOMETHING, COUNT, ELEMENT;
+@@
+
+- alloc(sizeof(SOMETHING) + COUNT * sizeof(ELEMENT))
++ alloc(CHECKME_struct_size(&SOMETHING, ELEMENT, COUNT))
